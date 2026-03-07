@@ -387,144 +387,319 @@
     margin-bottom: 1.5rem;
 }
 
-/* Info Card */
+/* Info Card - Enhanced Design */
 .info-card {
-    background: rgba(255, 255, 255, 0.95);
+    background: rgba(255, 255, 255, 0.98);
     backdrop-filter: blur(20px);
-    border-radius: 20px;
-    border: 1px solid rgba(0, 0, 0, 0.06);
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+    border-radius: 24px;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
     overflow: hidden;
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.info-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #EE2E24, #C41E1A, #EE2E24);
+    background-size: 200% 100%;
+    animation: shimmer 3s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+
+.info-card:hover {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+    transform: translateY(-2px);
 }
 
 .info-card-header {
-    padding: 1.25rem 1.5rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    padding: 1.5rem 1.75rem;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
     display: flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 1rem;
+    background: linear-gradient(135deg, #fafbfc 0%, #ffffff 100%);
 }
 
 .info-card-header .header-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 10px;
-    background: rgba(238, 46, 36, 0.1);
+    width: 48px;
+    height: 48px;
+    border-radius: 14px;
+    background: linear-gradient(135deg, rgba(238, 46, 36, 0.15), rgba(196, 30, 26, 0.1));
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.1rem;
+    font-size: 1.25rem;
     color: #EE2E24;
     flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(238, 46, 36, 0.15);
+    transition: all 0.3s ease;
+}
+
+.info-card:hover .info-card-header .header-icon {
+    transform: scale(1.05) rotate(5deg);
+    box-shadow: 0 6px 16px rgba(238, 46, 36, 0.25);
 }
 
 .info-card-header h5 {
     margin: 0;
-    font-size: 1rem;
-    font-weight: 600;
-    color: #1f2937;
+    font-size: 1.125rem;
+    font-weight: 700;
+    color: #1e293b;
+    letter-spacing: -0.02em;
 }
 
 .info-card-body {
-    padding: 1.25rem 1.5rem;
+    padding: 1.5rem 1.75rem;
 }
 
-/* Info Items */
+/* Info Items - Enhanced Design */
 .info-item {
     display: flex;
-    align-items: flex-start;
-    padding: 0.85rem 1rem;
-    background: #f9fafb;
-    border-radius: 12px;
-    margin-bottom: 0.65rem;
-    transition: background 0.2s;
+    align-items: center;
+    padding: 1rem 1.25rem;
+    background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+    border-radius: 14px;
+    margin-bottom: 0.75rem;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.info-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 3px;
+    background: linear-gradient(180deg, #EE2E24, #C41E1A);
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.info-item:hover {
+    background: linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%);
+    border-color: rgba(238, 46, 36, 0.15);
+    transform: translateX(4px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.info-item:hover::before {
+    opacity: 1;
 }
 
 .info-item:last-child {
     margin-bottom: 0;
 }
 
-.info-item:hover {
-    background: #f3f4f6;
-}
-
 .info-item-label {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    min-width: 160px;
+    gap: 0.75rem;
+    min-width: 180px;
     font-weight: 600;
-    color: #6b7280;
-    font-size: 0.85rem;
+    color: #475569;
+    font-size: 0.875rem;
     flex-shrink: 0;
 }
 
 .info-item-label i {
     color: #EE2E24;
-    font-size: 0.8rem;
-    width: 16px;
+    font-size: 1rem;
+    width: 20px;
     text-align: center;
+    background: rgba(238, 46, 36, 0.1);
+    padding: 0.4rem;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .info-item-value {
-    color: #1f2937;
-    font-weight: 500;
-    font-size: 0.9rem;
+    color: #1e293b;
+    font-weight: 600;
+    font-size: 0.95rem;
     flex: 1;
+    line-height: 1.5;
 }
 
-/* Status Badge */
+/* Status Badge - Enhanced Design */
 .status-badge {
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
-    padding: 0.4rem 1rem;
+    gap: 0.5rem;
+    padding: 0.5rem 1.25rem;
     border-radius: 50px;
-    font-weight: 600;
-    font-size: 0.8rem;
+    font-weight: 700;
+    font-size: 0.85rem;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.status-badge::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+    transition: left 0.5s ease;
+}
+
+.status-badge:hover::before {
+    left: 100%;
 }
 
 .status-badge.accepted {
-    background: rgba(16, 185, 129, 0.15);
-    color: #059669;
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(5, 150, 105, 0.15));
+    color: #047857;
+    border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.status-badge.accepted:hover {
+    background: linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(5, 150, 105, 0.2));
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
 }
 
 .status-badge.rejected {
-    background: rgba(239, 68, 68, 0.12);
-    color: #dc2626;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(220, 38, 38, 0.15));
+    color: #b91c1c;
+    border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.status-badge.rejected:hover {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.25), rgba(220, 38, 38, 0.2));
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
 }
 
 .status-badge.finished {
-    background: rgba(59, 130, 246, 0.12);
-    color: #2563eb;
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(37, 99, 235, 0.15));
+    color: #1e40af;
+    border: 1px solid rgba(59, 130, 246, 0.3);
+}
+
+.status-badge.finished:hover {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.25), rgba(37, 99, 235, 0.2));
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 .status-badge.pending {
-    background: rgba(245, 158, 11, 0.15);
-    color: #d97706;
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.2), rgba(217, 119, 6, 0.15));
+    color: #b45309;
+    border: 1px solid rgba(245, 158, 11, 0.3);
 }
 
-/* Download Button */
+.status-badge.pending:hover {
+    background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(217, 119, 6, 0.2));
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+/* Download Button - Enhanced */
 .btn-download-letter {
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
-    padding: 0.45rem 1rem;
+    gap: 0.5rem;
+    padding: 0.55rem 1.25rem;
     background: linear-gradient(135deg, #EE2E24, #C41E1A);
     color: white;
     border: none;
-    border-radius: 10px;
-    font-size: 0.8rem;
-    font-weight: 600;
+    border-radius: 12px;
+    font-size: 0.85rem;
+    font-weight: 700;
     text-decoration: none;
     transition: all 0.3s ease;
-    box-shadow: 0 2px 8px rgba(238, 46, 36, 0.25);
+    box-shadow: 0 4px 12px rgba(238, 46, 36, 0.3);
+    position: relative;
+    overflow: hidden;
+}
+
+.btn-download-letter::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn-download-letter:hover::before {
+    width: 300px;
+    height: 300px;
 }
 
 .btn-download-letter:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 14px rgba(238, 46, 36, 0.35);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(238, 46, 36, 0.4);
     color: white;
+}
+
+.btn-download-letter i {
+    font-size: 0.9rem;
+    transition: transform 0.3s ease;
+}
+
+.btn-download-letter:hover i {
+    transform: translateY(-2px);
+}
+
+/* Special styling for status item */
+.info-item.status-item {
+    background: linear-gradient(135deg, #fef3f2 0%, #fff7ed 100%);
+    border: 2px solid rgba(238, 46, 36, 0.15);
+    padding: 1.25rem 1.5rem;
+}
+
+.info-item.status-item:hover {
+    background: linear-gradient(135deg, #fee2e2 0%, #ffedd5 100%);
+    border-color: rgba(238, 46, 36, 0.25);
+}
+
+.info-item.status-item .info-item-label {
+    font-size: 0.9rem;
+    color: #7c2d12;
+}
+
+.info-item.status-item .info-item-value {
+    font-size: 1rem;
+}
+
+/* Special styling for document items */
+.info-item.document-item {
+    background: linear-gradient(135deg, #f0f9ff 0%, #f8fafc 100%);
+    border-color: rgba(59, 130, 246, 0.1);
+}
+
+.info-item.document-item:hover {
+    background: linear-gradient(135deg, #e0f2fe 0%, #f1f5f9 100%);
+    border-color: rgba(59, 130, 246, 0.2);
+}
+
+.info-item.document-item .info-item-label i {
+    background: rgba(59, 130, 246, 0.1);
+    color: #2563eb;
 }
 
 /* Password Card */
@@ -694,11 +869,29 @@
 
     .info-item {
         flex-direction: column;
-        gap: 0.25rem;
+        gap: 0.5rem;
+        padding: 1rem;
     }
 
     .info-item-label {
         min-width: auto;
+        width: 100%;
+    }
+
+    .info-item-value {
+        width: 100%;
+        text-align: left;
+    }
+
+    .status-badge {
+        font-size: 0.8rem;
+        padding: 0.45rem 1rem;
+    }
+
+    .btn-download-letter {
+        width: 100%;
+        justify-content: center;
+        padding: 0.65rem 1rem;
     }
 
     .password-fields-grid {
@@ -871,7 +1064,7 @@
                 <div class="info-item-label"><i class="fas fa-tags"></i> <span>Bidang Peminatan</span></div>
                 <div class="info-item-value">{{ $application->fieldOfInterest->name ?? '-' }}</div>
             </div>
-            <div class="info-item">
+            <div class="info-item status-item">
                 <div class="info-item-label"><i class="fas fa-info-circle"></i> <span>Status</span></div>
                 <div class="info-item-value">
                     @if($application->status == 'accepted')
@@ -901,7 +1094,7 @@
                 </div>
             </div>
             @if($application->status == 'accepted' || $application->status == 'finished')
-            <div class="info-item">
+            <div class="info-item document-item">
                 <div class="info-item-label"><i class="fas fa-file-pdf"></i> <span>Surat Penerimaan</span></div>
                 <div class="info-item-value">
                     @if($application->acceptance_letter_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($application->acceptance_letter_path))
@@ -909,11 +1102,11 @@
                             <i class="fas fa-download"></i> Download
                         </a>
                     @else
-                        <span style="color: #9ca3af;">Belum tersedia</span>
+                        <span style="color: #9ca3af; font-style: italic;">Belum tersedia</span>
                     @endif
                 </div>
             </div>
-            <div class="info-item">
+            <div class="info-item document-item">
                 <div class="info-item-label"><i class="fas fa-map-marked-alt"></i> <span>Surat Izin Masuk Lokasi</span></div>
                 <div class="info-item-value">
                     @if($application->location_permission_letter_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($application->location_permission_letter_path))
@@ -921,11 +1114,11 @@
                             <i class="fas fa-download"></i> Download
                         </a>
                     @else
-                        <span style="color: #9ca3af;">Belum tersedia</span>
+                        <span style="color: #9ca3af; font-style: italic;">Belum tersedia</span>
                     @endif
                 </div>
             </div>
-            <div class="info-item">
+            <div class="info-item document-item">
                 <div class="info-item-label"><i class="fas fa-file-contract"></i> <span>Pakta Integritas</span></div>
                 <div class="info-item-value">
                     @if($application->integrity_pact_path && \Illuminate\Support\Facades\Storage::disk('public')->exists($application->integrity_pact_path))
@@ -933,7 +1126,7 @@
                             <i class="fas fa-download"></i> Download
                         </a>
                     @else
-                        <span style="color: #9ca3af;">Belum tersedia</span>
+                        <span style="color: #9ca3af; font-style: italic;">Belum tersedia</span>
                     @endif
                 </div>
             </div>
