@@ -736,9 +736,16 @@ class MentorDashboardController extends Controller
         if (!$application || !$divisionMentor || $application->division_mentor_id !== $divisionMentor->id) {
             abort(403);
         }
-        $assignment->is_revision = $request->is_revision;
+        $assignment->is_revision = (int) $request->is_revision;
+        // Jika tugas ditandai sebagai revisi, hapus nilai agar tidak bisa dinilai bersamaan
+        if ((int) $request->is_revision === 1) {
+            $assignment->grade = null;
+        }
         $assignment->save();
-        return redirect()->route('mentor.penugasan')->with('success', 'Status revisi tugas berhasil diperbarui.');
+
+        return redirect()->route('mentor.penugasan')
+            ->with('success', 'Status revisi ditetapkan. Silakan isi feedback lalu simpan penilaian.')
+            ->with('revision_set_assignment_id', $assignment->id);
     }
 
     public function editPenugasan($assignmentId)

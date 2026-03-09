@@ -1255,17 +1255,17 @@ input[type="date"] {
 
     {{-- Tabs Navigation --}}
     <div class="tabs-card">
-        <button class="tab-btn active" onclick="switchTab('overview')">
+        <button class="tab-btn active" data-tab="overview" onclick="switchTab('overview', this)">
             <i class="fas fa-th-large"></i> Overview Peserta
         </button>
-        <button class="tab-btn" onclick="switchTab('create')">
+        <button class="tab-btn" data-tab="create" onclick="switchTab('create', this)">
             <i class="fas fa-plus-circle"></i> Buat Tugas Baru
         </button>
-        <button class="tab-btn" onclick="switchTab('tasks')">
+        <button class="tab-btn" data-tab="tasks" onclick="switchTab('tasks', this)">
             <i class="fas fa-list"></i> Semua Tugas
             <span class="badge-count">{{ $totalTasks }}</span>
         </button>
-        <button class="tab-btn" onclick="switchTab('grading')">
+        <button class="tab-btn" data-tab="grading" onclick="switchTab('grading', this)">
             <i class="fas fa-star"></i> Penilaian
             @if($pendingGrading > 0)
                 <span class="badge-count">{{ $pendingGrading }}</span>
@@ -1622,6 +1622,12 @@ input[type="date"] {
                     <h3>Tugas Menunggu Penilaian</h3>
                 </div>
             </div>
+            @if(session('revision_set_assignment_id'))
+                <div style="padding: 0.75rem 1.5rem 0; color: #16a34a; font-size: 0.85rem;">
+                    <i class="fas fa-info-circle"></i>
+                    Status revisi sudah ditetapkan. Silakan isi feedback pada tugas terkait lalu tekan tombol Simpan.
+                </div>
+            @endif
             <table class="data-table">
                 <thead>
                     <tr>
@@ -1632,6 +1638,7 @@ input[type="date"] {
                         <th style="width: 120px;">File</th>
                         <th style="width: 100px;">Nilai</th>
                         <th style="width: 200px;">Feedback</th>
+                        <th style="width: 110px;">Revisi</th>
                         <th style="width: 100px;">Aksi</th>
                     </tr>
                 </thead>
@@ -1707,6 +1714,18 @@ input[type="date"] {
                                                 <span class="btn-loading">
                                                     <span class="spinner-border spinner-border-sm"></span>
                                                 </span>
+                                            </button>
+                                        </form>
+                                    </td>
+                                    <td>
+                                        <form method="POST" action="{{ route('mentor.penugasan.revisi', $assignment->id) }}" class="d-inline">
+                                            @csrf
+                                            <input type="hidden" name="is_revision" value="1">
+                                            <button type="submit"
+                                                class="btn-danger-solid"
+                                                @if($assignment->is_revision === 1) disabled @endif
+                                                title="Tandai tugas sebagai revisi">
+                                                <i class="fas fa-redo"></i> Revisi
                                             </button>
                                         </form>
                                     </td>
@@ -1958,6 +1977,12 @@ var taskDataStore = @php
                 'filePath' => $assignment->file_path ? asset('storage/' . $assignment->file_path) : '',
                 'submissionPath' => $hasSub && $latestSub && $latestSub->file_path ? asset('storage/' . $latestSub->file_path) : ($assignment->submission_file_path ? asset('storage/' . $assignment->submission_file_path) : ''),
                 'submittedAt' => $hasSub && $latestSub && $latestSub->submitted_at ? \Carbon\Carbon::parse($latestSub->submitted_at)->format('d M Y H:i') : '',
+                'submissions' => $hasSub ? $assignment->submissions->sortBy('submitted_at')->map(function($sub, $index) {
+                    return [
+                        'file_path' => $sub->file_path ? asset('storage/' . $sub->file_path) : '',
+                        'submitted_at' => $sub->submitted_at ? \Carbon\Carbon::parse($sub->submitted_at)->format('d M Y H:i') : '',
+                    ];
+                })->values()->all() : [],
             ];
         }
     }
@@ -1965,7 +1990,7 @@ var taskDataStore = @php
 @endphp;
 
 // Tab switching
-function switchTab(tabName) {
+function switchTab(tabName, sourceBtn = null) {
     // Hide all tabs
     document.querySelectorAll('.tab-content').forEach(tab => {
         tab.classList.remove('active');
@@ -1977,9 +2002,28 @@ function switchTab(tabName) {
     });
 
     // Show selected tab
-    document.getElementById('tab-' + tabName).classList.add('active');
-    event.target.closest('.tab-btn').classList.add('active');
+    var targetTab = document.getElementById('tab-' + tabName);
+    if (targetTab) {
+        targetTab.classList.add('active');
+    }
+
+    // Activate the correct button
+    if (sourceBtn) {
+        sourceBtn.classList.add('active');
+    } else {
+        var autoBtn = document.querySelector('.tab-btn[data-tab=\"' + tabName + '\"]');
+        if (autoBtn) {
+            autoBtn.classList.add('active');
+        }
+    }
 }
+
+// Aktifkan tab Penilaian otomatis setelah set revisi
+document.addEventListener('DOMContentLoaded', function() {
+    @if(session('revision_set_assignment_id'))
+        switchTab('grading');
+    @endif
+});
 
 // Select all participants (only enabled ones)
 function toggleSelectAll() {
@@ -2153,14 +2197,28 @@ function viewTaskDetail(assignmentId) {
     filesList.innerHTML = '';
     var hasFiles = false;
 
+    // File tugas dari mentor
     if (data.filePath) {
         hasFiles = true;
         filesList.innerHTML += '<a href="' + data.filePath + '" target="_blank" class="btn-action btn-outline btn-sm"><i class="fas fa-download"></i> File Tugas</a>';
     }
-    if (data.submissionPath) {
+
+    // Semua submission peserta (pertama + revisi)
+    if (Array.isArray(data.submissions) && data.submissions.length > 0) {
+        hasFiles = true;
+        data.submissions.forEach(function(sub, index) {
+            var label = index === 0 ? 'Kumpulan Pertama' : 'Revisi ' + index;
+            var timeInfo = sub.submitted_at ? ' (' + sub.submitted_at + ')' : '';
+            if (sub.file_path) {
+                filesList.innerHTML += '<a href="' + sub.file_path + '" target="_blank" class="btn-action btn-success btn-sm"><i class="fas fa-download"></i> ' + label + timeInfo + '</a>';
+            }
+        });
+    } else if (data.submissionPath) {
+        // Fallback ke struktur lama bila ada
         hasFiles = true;
         filesList.innerHTML += '<a href="' + data.submissionPath + '" target="_blank" class="btn-action btn-success btn-sm"><i class="fas fa-download"></i> File Submission' + (data.submittedAt ? ' (' + data.submittedAt + ')' : '') + '</a>';
     }
+
     filesSection.style.display = hasFiles ? '' : 'none';
 
     openPopup('taskDetailPopup');

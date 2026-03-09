@@ -1093,18 +1093,33 @@ function openDetailPopup(id) {
         fileEl.innerHTML = `<span class="popup-no-file">Tidak ada file tugas</span>`;
     }
 
-    // Grade
+    // Grade & Feedback
     const gradeEl = document.getElementById('popupGrade');
-    if (data.grade !== null) {
-        let feedbackHtml = data.feedback
-            ? `<div class="popup-grade-item"><div class="popup-grade-label">Feedback</div><div class="popup-feedback-text">${escapeHtml(data.feedback)}</div></div>`
-            : `<div class="popup-grade-item"><div class="popup-grade-label">Feedback</div><div class="popup-grade-value none">Tidak ada feedback</div></div>`;
-        gradeEl.innerHTML = `
-            <div class="popup-grade-row">
+    if (data.grade !== null || data.feedback) {
+        let gradeHtml = '';
+        if (data.grade !== null) {
+            gradeHtml = `
                 <div class="popup-grade-item">
                     <div class="popup-grade-label">Nilai</div>
                     <div class="popup-grade-value">${data.grade}/10</div>
                 </div>
+            `;
+        } else {
+            gradeHtml = `
+                <div class="popup-grade-item">
+                    <div class="popup-grade-label">Nilai</div>
+                    <div class="popup-grade-value none">Belum dinilai</div>
+                </div>
+            `;
+        }
+
+        const feedbackHtml = data.feedback
+            ? `<div class="popup-grade-item"><div class="popup-grade-label">Feedback</div><div class="popup-feedback-text">${escapeHtml(data.feedback)}</div></div>`
+            : `<div class="popup-grade-item"><div class="popup-grade-label">Feedback</div><div class="popup-grade-value none">Tidak ada feedback</div></div>`;
+
+        gradeEl.innerHTML = `
+            <div class="popup-grade-row">
+                ${gradeHtml}
                 ${feedbackHtml}
             </div>
         `;
