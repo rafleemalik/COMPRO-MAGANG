@@ -18,6 +18,7 @@
 @endphp
 
 @push('styles')
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css">
 <style>
 /* ============================================
    PROFILE PAGE STYLES
@@ -173,12 +174,246 @@
 .ph-tag.active i { color: #059669; }
 
 /* Photo upload modal */
-.photo-modal-overlay {
+/* Crop Dialog Overlay */
+.crop-dialog-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+    padding: 1rem;
+}
+
+.crop-dialog-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.crop-dialog {
+    background: white;
+    border-radius: 20px;
+    width: 100%;
+    max-width: 650px;
+    max-height: 90vh;
+    overflow: hidden;
+    transform: scale(0.9) translateY(20px);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.2);
+}
+
+.crop-dialog-overlay.show .crop-dialog {
+    transform: scale(1) translateY(0);
+}
+
+.crop-dialog-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.25rem 1.5rem;
+    border-bottom: 1px solid #e5e7eb;
+    background: linear-gradient(135deg, #f9fafb 0%, #fff 100%);
+}
+
+.crop-dialog-header h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #1f2937;
+    margin: 0;
+}
+
+.crop-dialog-close {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    color: #6b7280;
+    transition: all 0.2s;
+}
+
+.crop-dialog-close:hover {
+    background: #f3f4f6;
+    color: #1f2937;
+}
+
+.crop-dialog-body {
+    padding: 1.5rem;
+    display: flex;
+    gap: 1.5rem;
+    align-items: flex-start;
+    background: #f9fafb;
+}
+
+.crop-dialog-canvas {
+    flex: 1;
+    max-height: 400px;
+    overflow: hidden;
+    border-radius: 16px;
+    background: #f3f4f6;
+}
+
+.crop-dialog-canvas img {
+    display: block;
+    max-width: 100%;
+}
+
+.crop-dialog-preview {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1rem;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.preview-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin: 0;
+}
+
+.crop-dialog-preview-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 4px solid white;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
+    background: #f3f4f6;
+}
+
+.crop-dialog-footer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    background: white;
+    border-top: 1px solid #e5e7eb;
+}
+
+.crop-dialog-tools {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.crop-tool-btn {
+    width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f3f4f6;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    cursor: pointer;
+    color: #6b7280;
+    transition: all 0.2s;
+}
+
+.crop-tool-btn:hover {
+    background: white;
+    border-color: #EE2E24;
+    color: #EE2E24;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(238, 46, 36, 0.15);
+}
+
+.crop-tool-btn:active {
+    transform: scale(0.95) translateY(0);
+}
+
+.crop-dialog-actions {
+    display: flex;
+    gap: 0.75rem;
+}
+
+.btn-cancel-crop {
+    padding: 0.7rem 1.25rem;
+    background: transparent;
+    border: 2px solid #d1d5db;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #4b5563;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.btn-cancel-crop:hover {
+    background: #f3f4f6;
+    border-color: #9ca3af;
+}
+
+.btn-apply-crop {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.5rem;
+    background: linear-gradient(135deg, #EE2E24 0%, #C41E1A 100%);
+    border: none;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: white;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 14px rgba(238, 46, 36, 0.35);
+}
+
+.btn-apply-crop:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(238, 46, 36, 0.45);
+}
+
+.btn-apply-crop:active {
+    transform: translateY(0);
+}
+
+/* Cropper.js circular crop */
+.cropper-view-box,
+.cropper-face {
+    border-radius: 50%;
+}
+
+.cropper-view-box {
+    outline: 3px solid #EE2E24;
+    outline-offset: -3px;
+}
+
+.cropper-modal {
+    background-color: rgba(0, 0, 0, 0.35) !important;
+    opacity: 1 !important;
+}
+
+.cropper-bg { background-image: none !important; }
+.cropper-dashed { border-color: rgba(255,255,255,0.5); opacity: 0.8; }
+.cropper-center { opacity: 0; }
+.cropper-point { background-color: #EE2E24; width: 12px; height: 12px; border-radius: 50%; }
+.cropper-point.point-se { width: 14px; height: 14px; }
+.cropper-line { background-color: #EE2E24; opacity: 0.3; }
+
+/* Photo upload initial select */
+.photo-select-overlay {
     position: fixed;
     inset: 0;
     background: rgba(0,0,0,0.6);
     backdrop-filter: blur(4px);
-    z-index: 1050;
+    z-index: 9998;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -188,12 +423,12 @@
     transition: all 0.3s ease;
 }
 
-.photo-modal-overlay.active {
+.photo-select-overlay.active {
     opacity: 1;
     visibility: visible;
 }
 
-.photo-modal {
+.photo-select-modal {
     background: white;
     border-radius: 20px;
     max-width: 420px;
@@ -203,11 +438,11 @@
     transition: all 0.3s ease;
 }
 
-.photo-modal-overlay.active .photo-modal {
+.photo-select-overlay.active .photo-select-modal {
     transform: scale(1) translateY(0);
 }
 
-.photo-modal-header {
+.photo-select-header {
     padding: 1.25rem 1.5rem;
     border-bottom: 1px solid #e5e7eb;
     display: flex;
@@ -215,7 +450,7 @@
     justify-content: space-between;
 }
 
-.photo-modal-header h4 {
+.photo-select-header h4 {
     margin: 0;
     font-size: 1.1rem;
     font-weight: 600;
@@ -225,9 +460,9 @@
     gap: 0.5rem;
 }
 
-.photo-modal-header h4 i { color: #EE2E24; }
+.photo-select-header h4 i { color: #EE2E24; }
 
-.photo-modal-close {
+.photo-select-close {
     width: 32px;
     height: 32px;
     border-radius: 8px;
@@ -241,9 +476,9 @@
     transition: all 0.2s;
 }
 
-.photo-modal-close:hover { background: #e5e7eb; color: #374151; }
+.photo-select-close:hover { background: #e5e7eb; color: #374151; }
 
-.photo-modal-body {
+.photo-select-body {
     padding: 1.5rem;
 }
 
@@ -288,75 +523,6 @@
     font-size: 0.8rem;
 }
 
-.photo-preview-area {
-    display: none;
-    text-align: center;
-}
-
-.photo-preview-area.active {
-    display: block;
-}
-
-.photo-preview-img {
-    width: 140px;
-    height: 140px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid #e5e7eb;
-    margin: 0 auto 1rem;
-    display: block;
-}
-
-.photo-preview-name {
-    font-size: 0.85rem;
-    color: #6b7280;
-    margin-bottom: 1rem;
-}
-
-.photo-modal-actions {
-    display: flex;
-    gap: 0.75rem;
-    margin-top: 1.25rem;
-}
-
-.photo-modal-actions button {
-    flex: 1;
-    padding: 0.7rem 1rem;
-    border-radius: 12px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.4rem;
-    border: none;
-}
-
-.btn-photo-cancel {
-    background: #f3f4f6;
-    color: #4b5563;
-}
-
-.btn-photo-cancel:hover { background: #e5e7eb; }
-
-.btn-photo-save {
-    background: linear-gradient(135deg, #EE2E24, #C41E1A);
-    color: white;
-    box-shadow: 0 2px 8px rgba(238, 46, 36, 0.25);
-}
-
-.btn-photo-save:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(238, 46, 36, 0.35);
-}
-
-.btn-photo-save:disabled {
-    opacity: 0.5;
-    pointer-events: none;
-}
-
 .btn-photo-remove {
     padding: 0.5rem 1rem;
     border-radius: 10px;
@@ -377,6 +543,18 @@
 
 .btn-photo-remove:hover {
     background: rgba(239, 68, 68, 0.15);
+}
+
+@media (max-width: 640px) {
+    .crop-dialog { max-width: 95%; max-height: 85vh; }
+    .crop-dialog-body { flex-direction: column; align-items: center; padding: 1rem; }
+    .crop-dialog-canvas { width: 100%; max-height: 280px; }
+    .crop-dialog-preview { flex-direction: row; width: 100%; justify-content: center; padding: 0.75rem; }
+    .crop-dialog-preview-circle { width: 80px; height: 80px; }
+    .crop-dialog-footer { flex-direction: column; gap: 1rem; padding: 1rem; }
+    .crop-dialog-tools { width: 100%; justify-content: center; }
+    .crop-dialog-actions { width: 100%; }
+    .crop-dialog-actions button { flex: 1; justify-content: center; }
 }
 
 /* Cards Grid */
@@ -969,31 +1147,87 @@
     </div>
 </div>
 
-{{-- Photo Upload Modal --}}
-<div class="photo-modal-overlay" id="photoModalOverlay">
-    <div class="photo-modal">
-        <div class="photo-modal-header">
+{{-- Photo Select Modal --}}
+<div class="photo-select-overlay" id="photoSelectOverlay">
+    <div class="photo-select-modal">
+        <div class="photo-select-header">
             <h4><i class="fas fa-camera"></i> Ubah Foto Profil</h4>
-            <button class="photo-modal-close" id="closePhotoModal"><i class="fas fa-times"></i></button>
+            <button class="photo-select-close" id="closePhotoSelect"><i class="fas fa-times"></i></button>
         </div>
-        <div class="photo-modal-body">
+        <div class="photo-select-body">
             <div class="photo-dropzone" id="photoDropzone">
                 <div class="photo-dropzone-icon"><i class="fas fa-cloud-upload-alt"></i></div>
                 <p>Klik atau seret foto ke sini</p>
                 <small>JPG, JPEG, PNG — Maks. 2MB</small>
                 <input type="file" id="photoFileInput" accept="image/jpeg,image/jpg,image/png" style="display: none;">
             </div>
-            <div class="photo-preview-area" id="photoPreviewArea">
-                <img src="" alt="Preview" class="photo-preview-img" id="photoPreviewImg">
-                <div class="photo-preview-name" id="photoPreviewName"></div>
-            </div>
-            <div class="photo-modal-actions">
-                <button class="btn-photo-cancel" id="btnPhotoCancel"><i class="fas fa-times"></i> Batal</button>
-                <button class="btn-photo-save" id="btnPhotoSave" disabled><i class="fas fa-check"></i> Simpan</button>
-            </div>
             @if($user->profile_picture)
             <button class="btn-photo-remove" id="btnPhotoRemove"><i class="fas fa-trash-alt"></i> Hapus Foto Profil</button>
             @endif
+        </div>
+    </div>
+</div>
+
+{{-- Crop Dialog --}}
+<div class="crop-dialog-overlay" id="cropperModal">
+    <div class="crop-dialog">
+        <div class="crop-dialog-header">
+            <h3>Sesuaikan Foto Profil</h3>
+            <button type="button" class="crop-dialog-close" id="closeCropperModal">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+            </button>
+        </div>
+        <div class="crop-dialog-body">
+            <div class="crop-dialog-canvas">
+                <img id="cropperImage" src="" alt="Crop Preview">
+            </div>
+            <div class="crop-dialog-preview">
+                <p class="preview-label">Preview</p>
+                <div class="crop-dialog-preview-circle" id="cropperPreview"></div>
+            </div>
+        </div>
+        <div class="crop-dialog-footer">
+            <div class="crop-dialog-tools">
+                <button type="button" class="crop-tool-btn" data-action="rotate-left" title="Putar Kiri">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M2.5 2v6h6M2.66 15.57a10 10 0 1 0 .57-8.38"/>
+                    </svg>
+                </button>
+                <button type="button" class="crop-tool-btn" data-action="rotate-right" title="Putar Kanan">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38"/>
+                    </svg>
+                </button>
+                <button type="button" class="crop-tool-btn" data-action="zoom-in" title="Perbesar">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        <line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/>
+                    </svg>
+                </button>
+                <button type="button" class="crop-tool-btn" data-action="zoom-out" title="Perkecil">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        <line x1="8" y1="11" x2="14" y2="11"/>
+                    </svg>
+                </button>
+                <button type="button" class="crop-tool-btn" data-action="reset" title="Reset">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                        <path d="M3 3v5h5"/>
+                    </svg>
+                </button>
+            </div>
+            <div class="crop-dialog-actions">
+                <button type="button" class="btn-cancel-crop" id="cancelCrop">Batal</button>
+                <button type="button" class="btn-apply-crop" id="applyCrop">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="20 6 9 17 4 12"/>
+                    </svg>
+                    Terapkan
+                </button>
+            </div>
         </div>
     </div>
 </div>
@@ -1404,57 +1638,39 @@
 @endsection
 
 @push('scripts')
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    const overlay = document.getElementById('photoModalOverlay');
+    const selectOverlay = document.getElementById('photoSelectOverlay');
     const openBtn = document.getElementById('openPhotoModal');
-    const closeBtn = document.getElementById('closePhotoModal');
+    const closeSelectBtn = document.getElementById('closePhotoSelect');
     const dropzone = document.getElementById('photoDropzone');
     const fileInput = document.getElementById('photoFileInput');
-    const previewArea = document.getElementById('photoPreviewArea');
-    const previewImg = document.getElementById('photoPreviewImg');
-    const previewName = document.getElementById('photoPreviewName');
-    const btnCancel = document.getElementById('btnPhotoCancel');
-    const btnSave = document.getElementById('btnPhotoSave');
     const btnRemove = document.getElementById('btnPhotoRemove');
 
-    let selectedFile = null;
+    const cropperModal = document.getElementById('cropperModal');
+    const cropperImage = document.getElementById('cropperImage');
+    const closeCropperBtn = document.getElementById('closeCropperModal');
+    const cancelCropBtn = document.getElementById('cancelCrop');
+    const applyCropBtn = document.getElementById('applyCrop');
 
-    function openModal() {
-        overlay.classList.add('active');
+    let cropper = null;
+    let originalFile = null;
+
+    // === Photo Select Modal ===
+    function openSelectModal() {
+        selectOverlay.classList.add('active');
         document.body.style.overflow = 'hidden';
     }
 
-    function closeModal() {
-        overlay.classList.remove('active');
+    function closeSelectModal() {
+        selectOverlay.classList.remove('active');
         document.body.style.overflow = '';
-        resetPreview();
-    }
-
-    function resetPreview() {
-        selectedFile = null;
-        dropzone.style.display = '';
-        previewArea.classList.remove('active');
-        btnSave.disabled = true;
         fileInput.value = '';
     }
 
-    function showPreview(file) {
-        selectedFile = file;
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            previewImg.src = e.target.result;
-            previewName.textContent = file.name + ' (' + (file.size / 1024).toFixed(0) + ' KB)';
-            dropzone.style.display = 'none';
-            previewArea.classList.add('active');
-            btnSave.disabled = false;
-        };
-        reader.readAsDataURL(file);
-    }
-
     function validateFile(file) {
-        const allowed = ['image/jpeg', 'image/jpg', 'image/png'];
-        if (!allowed.includes(file.type)) {
+        if (!['image/jpeg', 'image/jpg', 'image/png'].includes(file.type)) {
             alert('Format file harus JPG, JPEG, atau PNG.');
             return false;
         }
@@ -1465,18 +1681,22 @@ document.addEventListener('DOMContentLoaded', function() {
         return true;
     }
 
-    openBtn.addEventListener('click', openModal);
-    closeBtn.addEventListener('click', closeModal);
-    overlay.addEventListener('click', function(e) {
-        if (e.target === overlay) closeModal();
+    function handleFileSelected(file) {
+        if (!validateFile(file)) return;
+        originalFile = file;
+        closeSelectModal();
+        openCropperModal(file);
+    }
+
+    openBtn.addEventListener('click', openSelectModal);
+    closeSelectBtn.addEventListener('click', closeSelectModal);
+    selectOverlay.addEventListener('click', function(e) {
+        if (e.target === selectOverlay) closeSelectModal();
     });
 
     dropzone.addEventListener('click', function() { fileInput.click(); });
-
     fileInput.addEventListener('change', function() {
-        if (this.files[0] && validateFile(this.files[0])) {
-            showPreview(this.files[0]);
-        }
+        if (this.files[0]) handleFileSelected(this.files[0]);
     });
 
     dropzone.addEventListener('dragover', function(e) {
@@ -1489,26 +1709,103 @@ document.addEventListener('DOMContentLoaded', function() {
     dropzone.addEventListener('drop', function(e) {
         e.preventDefault();
         this.classList.remove('dragover');
-        if (e.dataTransfer.files[0] && validateFile(e.dataTransfer.files[0])) {
-            showPreview(e.dataTransfer.files[0]);
-        }
+        if (e.dataTransfer.files[0]) handleFileSelected(e.dataTransfer.files[0]);
     });
 
-    btnCancel.addEventListener('click', function() {
-        if (selectedFile) {
-            resetPreview();
-        } else {
-            closeModal();
+    // === Cropper Modal ===
+    function openCropperModal(file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            cropperImage.src = e.target.result;
+            cropperModal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+
+            cropperImage.onload = function() {
+                if (cropper) cropper.destroy();
+                cropper = new Cropper(cropperImage, {
+                    aspectRatio: 1,
+                    viewMode: 1,
+                    dragMode: 'move',
+                    autoCropArea: 0.85,
+                    restore: false,
+                    guides: true,
+                    center: true,
+                    highlight: false,
+                    cropBoxMovable: true,
+                    cropBoxResizable: true,
+                    toggleDragModeOnDblclick: false,
+                    background: false,
+                    preview: '#cropperPreview',
+                });
+            };
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function closeCropperModal() {
+        cropperModal.classList.remove('show');
+        document.body.style.overflow = '';
+        fileInput.value = '';
+        if (cropper) {
+            cropper.destroy();
+            cropper = null;
         }
+    }
+
+    function applyCroppedImage() {
+        if (!cropper) return;
+
+        const originalText = applyCropBtn.innerHTML;
+        applyCropBtn.innerHTML = '<svg class="animate-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Memproses...';
+        applyCropBtn.disabled = true;
+
+        const canvas = cropper.getCroppedCanvas({
+            width: 400,
+            height: 400,
+            imageSmoothingEnabled: true,
+            imageSmoothingQuality: 'high',
+        });
+
+        canvas.toBlob(function(blob) {
+            const croppedFile = new File([blob], originalFile.name.replace(/\.[^.]+$/, '.jpg'), {
+                type: 'image/jpeg',
+                lastModified: Date.now(),
+            });
+
+            uploadProfilePicture(croppedFile);
+            closeCropperModal();
+
+            applyCropBtn.innerHTML = originalText;
+            applyCropBtn.disabled = false;
+        }, 'image/jpeg', 0.9);
+    }
+
+    closeCropperBtn.addEventListener('click', closeCropperModal);
+    cancelCropBtn.addEventListener('click', closeCropperModal);
+    applyCropBtn.addEventListener('click', applyCroppedImage);
+
+    cropperModal.addEventListener('click', function(e) {
+        if (e.target === cropperModal) closeCropperModal();
     });
 
-    btnSave.addEventListener('click', function() {
-        if (!selectedFile) return;
-        btnSave.disabled = true;
-        btnSave.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Mengunggah...';
+    // Crop tool buttons
+    document.querySelectorAll('.crop-tool-btn').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            if (!cropper) return;
+            switch (this.dataset.action) {
+                case 'rotate-left': cropper.rotate(-90); break;
+                case 'rotate-right': cropper.rotate(90); break;
+                case 'zoom-in': cropper.zoom(0.1); break;
+                case 'zoom-out': cropper.zoom(-0.1); break;
+                case 'reset': cropper.reset(); break;
+            }
+        });
+    });
 
+    // === Upload & Remove ===
+    function uploadProfilePicture(file) {
         const formData = new FormData();
-        formData.append('profile_picture', selectedFile);
+        formData.append('profile_picture', file);
         formData.append('_token', '{{ csrf_token() }}');
 
         fetch('{{ route("dashboard.pre-acceptance.profile-picture") }}', {
@@ -1519,33 +1816,15 @@ document.addEventListener('DOMContentLoaded', function() {
         .then(r => r.json())
         .then(data => {
             if (data.success) {
-                // Update hero avatar
-                const avatar = document.querySelector('.ph-avatar');
-                const existingImg = avatar.querySelector('img');
-                const existingIcon = avatar.querySelector('i');
-                if (existingIcon) existingIcon.remove();
-                if (existingImg) {
-                    existingImg.src = data.path;
-                } else {
-                    const img = document.createElement('img');
-                    img.src = data.path;
-                    img.alt = 'Profile';
-                    avatar.appendChild(img);
-                }
-                closeModal();
                 location.reload();
             } else {
                 alert(data.message || 'Gagal mengunggah foto.');
-                btnSave.disabled = false;
-                btnSave.innerHTML = '<i class="fas fa-check"></i> Simpan';
             }
         })
         .catch(() => {
             alert('Terjadi kesalahan. Coba lagi.');
-            btnSave.disabled = false;
-            btnSave.innerHTML = '<i class="fas fa-check"></i> Simpan';
         });
-    });
+    }
 
     if (btnRemove) {
         btnRemove.addEventListener('click', function() {
@@ -1564,7 +1843,6 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(r => r.json())
             .then(data => {
                 if (data.success) {
-                    closeModal();
                     location.reload();
                 } else {
                     alert(data.message || 'Gagal menghapus foto.');
@@ -1580,8 +1858,12 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Escape key
     document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape' && overlay.classList.contains('active')) closeModal();
+        if (e.key === 'Escape') {
+            if (cropperModal.classList.contains('show')) closeCropperModal();
+            else if (selectOverlay.classList.contains('active')) closeSelectModal();
+        }
     });
 });
 </script>
