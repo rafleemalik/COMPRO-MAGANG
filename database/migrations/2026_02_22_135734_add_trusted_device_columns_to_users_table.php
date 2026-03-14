@@ -11,11 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->string('trusted_device_token')->nullable()->after('remember_token');
-            $table->timestamp('trusted_device_expires_at')->nullable()->after('trusted_device_token');
-            $table->string('device_fingerprint')->nullable()->after('trusted_device_expires_at');
-        });
+        // Kolom trusted device sudah ditambahkan oleh migration
+        // 2026_02_18_231513_add_trusted_device_columns_to_users_table.
+        // Migration ini dibuat no-op supaya tidak terjadi duplikasi kolom,
+        // khususnya pada SQLite yang dipakai di Railway saat boot.
+        //
+        // Dibiarkan kosong dengan sengaja.
     }
 
     /**
@@ -23,8 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropColumn(['trusted_device_token', 'trusted_device_expires_at', 'device_fingerprint']);
-        });
+        // Tidak perlu melakukan apa-apa di sini karena up() sudah no-op.
     }
 };
