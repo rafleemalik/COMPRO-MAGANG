@@ -17,7 +17,7 @@
 
     $submittedCount = $assignments->filter(function($a) {
         if (!$a->submitted_at) return false;
-        if ($a->is_revision === 1) {
+        if ((int) $a->is_revision === 1) {
             $lastSubmission = $a->submissions ? $a->submissions->sortByDesc('submitted_at')->first() : null;
             if (!$lastSubmission || ($a->updated_at && $lastSubmission->submitted_at < $a->updated_at)) {
                 return false;
@@ -33,13 +33,13 @@
     // Prepare data for JS popup
     $assignmentsJson = $sortedAssignments->map(function($a) {
         $showBelumKumpul = false;
-        if ($a->is_revision === 1) {
+        if ((int) $a->is_revision === 1) {
             $lastSubmission = $a->submissions ? $a->submissions->sortByDesc('submitted_at')->first() : null;
             if (!$lastSubmission || ($a->updated_at && $lastSubmission->submitted_at < $a->updated_at)) {
                 $showBelumKumpul = true;
             }
         }
-        $needsSubmit = !$a->submitted_at || $a->is_revision === 1;
+        $needsSubmit = !$a->submitted_at || (int) $a->is_revision === 1;
 
         return [
             'id' => $a->id,
@@ -53,7 +53,7 @@
             'feedback' => $a->feedback,
             'submitted_at' => $a->submitted_at ? $a->submitted_at->format('d M Y H:i') : null,
             'needs_submit' => $needsSubmit,
-            'is_revision' => $a->is_revision === 1 && $showBelumKumpul,
+            'is_revision' => (int) $a->is_revision === 1 && $showBelumKumpul,
             'submit_url' => route('dashboard.assignments.submit', $a->id),
         ];
     })->values();

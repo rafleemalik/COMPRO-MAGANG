@@ -243,7 +243,7 @@ class LogbookController extends Controller
         // Get all mentors (optionally filtered by division)
         $mentorsQuery = DivisionMentor::query();
         if ($filterDivision) {
-            $mentorsQuery->where('division_admin_id', $filterDivision);
+            $mentorsQuery->where('division_id', $filterDivision);
         }
         $mentors = $mentorsQuery->orderBy('mentor_name')->get();
         
@@ -286,7 +286,7 @@ class LogbookController extends Controller
         
         $query = DivisionMentor::query();
         if ($divisionId) {
-            $query->where('division_admin_id', $divisionId);
+            $query->where('division_id', $divisionId);
         }
         
         $mentors = $query->orderBy('mentor_name')->get();

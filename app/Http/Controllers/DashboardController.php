@@ -230,7 +230,7 @@ class DashboardController extends Controller
         }
         $assignment->update($data);
         // Jika assignment sebelumnya status revisi, reset is_revision setelah submit revisi
-        if ($assignment->is_revision === 1) {
+        if ((int) $assignment->is_revision === 1) {
             $assignment->is_revision = null;
             $assignment->save();
         }

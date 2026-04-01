@@ -33,7 +33,7 @@
 
         foreach ($assignments as $assignment) {
             $hasSubmissions = $assignment->submissions && $assignment->submissions->count() > 0;
-            if (($hasSubmissions || $assignment->submission_file_path) && is_null($assignment->grade) && $assignment->is_revision !== 1) {
+            if (($hasSubmissions || $assignment->submission_file_path) && is_null($assignment->grade) && (int) $assignment->is_revision !== 1) {
                 $pendingGrading++;
             }
         }
@@ -1527,7 +1527,7 @@ input[type="date"] {
                                 $latestSubmission = $hasSubmissions ? $assignment->submissions->sortByDesc('submitted_at')->first() : null;
 
                                 $status = 'belum_dikerjakan';
-                                if ($assignment->is_revision === 1) {
+                                if ((int) $assignment->is_revision === 1) {
                                     $status = 'revisi';
                                 } elseif ($assignment->grade !== null) {
                                     $status = 'sudah_dinilai';
@@ -1652,9 +1652,9 @@ input[type="date"] {
 
                                 $perluNilai = false;
                                 if ($hasSubmissions || $assignment->submission_file_path) {
-                                    if (is_null($assignment->grade) && $assignment->is_revision !== 1) {
+                                    if (is_null($assignment->grade) && (int) $assignment->is_revision !== 1) {
                                         $perluNilai = true;
-                                    } elseif ($assignment->is_revision === 1 && empty($assignment->feedback)) {
+                                    } elseif ((int) $assignment->is_revision === 1 && empty($assignment->feedback)) {
                                         $perluNilai = true;
                                     }
                                 }
@@ -1698,13 +1698,13 @@ input[type="date"] {
                                             <input type="number" name="grade" class="grade-input"
                                                 placeholder="0-100" min="0" max="100"
                                                 value="{{ $assignment->grade ?? '' }}"
-                                                @if($assignment->is_revision === 1) disabled @else required @endif>
+                                                @if((int) $assignment->is_revision === 1) disabled @else required @endif>
                                     </td>
                                     <td>
                                             <input type="text" name="feedback" class="feedback-input"
                                                 placeholder="Feedback"
                                                 value="{{ $assignment->feedback ?? '' }}"
-                                                @if($assignment->is_revision === 1) required @endif>
+                                                @if((int) $assignment->is_revision === 1) required @endif>
                                     </td>
                                     <td>
                                             <button type="submit" class="btn-action btn-success btn-sm grade-submit-btn">
@@ -1718,12 +1718,14 @@ input[type="date"] {
                                         </form>
                                     </td>
                                     <td>
-                                        <form method="POST" action="{{ route('mentor.penugasan.revisi', $assignment->id) }}" class="d-inline">
+                                        <form method="POST" action="{{ route('mentor.penugasan.revisi', $assignment->id) }}" class="d-inline revision-form">
                                             @csrf
                                             <input type="hidden" name="is_revision" value="1">
+                                            <input type="hidden" name="feedback" value="">
                                             <button type="submit"
                                                 class="btn-danger-solid"
-                                                @if($assignment->is_revision === 1) disabled @endif
+                                                @if((int) $assignment->is_revision === 1) disabled @endif
+                                                onclick="prepareRevisionSubmit(this)"
                                                 title="Tandai tugas sebagai revisi">
                                                 <i class="fas fa-redo"></i> Revisi
                                             </button>
@@ -1960,7 +1962,7 @@ var taskDataStore = @php
             $hasSub = $assignment->submissions && $assignment->submissions->count() > 0;
             $latestSub = $hasSub ? $assignment->submissions->sortByDesc('submitted_at')->first() : null;
             $st = 'belum_dikerjakan';
-            if ($assignment->is_revision === 1) { $st = 'revisi'; }
+            if ((int) $assignment->is_revision === 1) { $st = 'revisi'; }
             elseif ($assignment->grade !== null) { $st = 'sudah_dinilai'; }
             elseif ($hasSub || $assignment->submission_file_path) { $st = 'sudah_submit'; }
 
@@ -2143,6 +2145,27 @@ document.querySelectorAll('.grade-form').forEach(form => {
         }
     });
 });
+
+// Support 2 flows for revisi:
+// 1) Mentor isi feedback dulu lalu klik "Revisi" (feedback ikut tersimpan + status revisi)
+// 2) Mentor klik "Revisi" dulu lalu isi feedback dan klik "Simpan"
+function prepareRevisionSubmit(btnEl) {
+    try {
+        const row = btnEl.closest('tr');
+        const revisionForm = btnEl.closest('form');
+        if (!row || !revisionForm) return true;
+
+        const feedbackInput = row.querySelector('input[name="feedback"]');
+        const hiddenFeedback = revisionForm.querySelector('input[type="hidden"][name="feedback"]');
+
+        if (hiddenFeedback && feedbackInput) {
+            hiddenFeedback.value = feedbackInput.value || '';
+        }
+    } catch (e) {
+        // no-op
+    }
+    return true;
+}
 
 // View task detail (lookup from data store by assignment ID)
 function viewTaskDetail(assignmentId) {

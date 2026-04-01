@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\AssignmentFeedbackLog;
 
 class Assignment extends Model
 {
@@ -29,6 +30,7 @@ class Assignment extends Model
         'submitted_at' => 'datetime',
         'deadline' => 'date',
         'presentation_date' => 'date',
+        'is_revision' => 'integer',
     ];
 
     /**
@@ -42,5 +44,10 @@ class Assignment extends Model
     public function submissions()
     {
         return $this->hasMany(AssignmentSubmission::class);
+    }
+
+    public function feedbackLogs()
+    {
+        return $this->hasMany(AssignmentFeedbackLog::class);
     }
 }

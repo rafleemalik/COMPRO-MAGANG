@@ -707,6 +707,11 @@ class MentorDashboardController extends Controller
                 'feedback' => 'required|string',
             ]);
             $assignment->feedback = $request->feedback;
+            \App\Models\AssignmentFeedbackLog::create([
+                'assignment_id' => $assignment->id,
+                'mentor_user_id' => $user->id,
+                'feedback' => $request->feedback,
+            ]);
             // Nilai tidak diubah
         } else {
             $request->validate([
@@ -726,6 +731,7 @@ class MentorDashboardController extends Controller
     {
         $request->validate([
             'is_revision' => 'required|in:0,1',
+            'feedback' => 'nullable|string',
         ]);
         $assignment = \App\Models\Assignment::findOrFail($assignmentId);
         $user = Auth::user();
@@ -740,6 +746,16 @@ class MentorDashboardController extends Controller
         // Jika tugas ditandai sebagai revisi, hapus nilai agar tidak bisa dinilai bersamaan
         if ((int) $request->is_revision === 1) {
             $assignment->grade = null;
+        }
+
+        // Support flow: isi feedback dulu lalu klik "Revisi"
+        if ((int) $request->is_revision === 1 && $request->filled('feedback')) {
+            $assignment->feedback = $request->feedback;
+            \App\Models\AssignmentFeedbackLog::create([
+                'assignment_id' => $assignment->id,
+                'mentor_user_id' => $user->id,
+                'feedback' => $request->feedback,
+            ]);
         }
         $assignment->save();
 
